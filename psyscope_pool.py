@@ -3,12 +3,7 @@ import os
 import psycopg2
 from psycopg2 import pool
 
-# database_connection = psycopg2.pool("dbname='{}' user='{}' host='{}' password='{}'"
-#                                       .format(STD_DB_NAME, STD_USER, STD_HOST, STD_PASSWORD))
 from postgres_config import conf_dbname, conf_dbpassword, conf_dbport, conf_dbuser, conf_hostname
-
-
-# pool.AbstractConnectionPool(0,1)
 
 
 def get_pool(connections=1):

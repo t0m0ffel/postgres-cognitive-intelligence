@@ -1,4 +1,4 @@
-# Table specifications form IMBD http://www.imdb.com/interfaces/
+# Table specifications from IMBD http://www.imdb.com/interfaces/
 import re
 
 import requests

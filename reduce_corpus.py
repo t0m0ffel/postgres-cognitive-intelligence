@@ -11,9 +11,10 @@ def reduce_corpus():
         file.write("")
 
     with open(filepath) as fp:
-        line = fp.readline()
         for i in range(line_count):
             line = fp.readline()
+            if line is None:
+                break
             with open("./corpus/actor_movie_corpus_reduced.txt", 'a') as file:
                 file.write(line)
             if i % 10000 == 0:

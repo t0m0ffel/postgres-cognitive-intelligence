@@ -11,27 +11,28 @@ import pandas as pd
 
 from engine import engine
 from imbd_specs import *
-
-pd.set_option('display.height', 1000)
-pd.set_option('display.max_rows', 500)
-pd.set_option('display.max_columns', 500)
-pd.set_option('display.width', 100)
+from postgres_config import is_db_existing
+from psyscope_pool import create_tables, drop_tables
 
 insert_thread_running = False
 thread_queue = Queue()
+db_data_directory = './db_data/'
+
+if not is_db_existing():
+    raise Exception('DB is not existing!')
 
 
 def download_file(url):
     file_name = re.findall('.com/(.*?).tsv.gz', url)[0]
     print('Start downloading file', file_name, '...')
-    if not os.path.isfile(file_name):
+    if not os.path.isfile(db_data_directory + file_name):
         # Download file and unzip
         response = urllib.request.urlopen(url)
         compressed_file = io.BytesIO(response.read())
         decompressed_file = gzip.GzipFile(fileobj=compressed_file)
 
         print("Done downloading", file_name)
-        with open(file_name, 'wb') as outfile:
+        with open(db_data_directory + file_name, 'wb') as outfile:
             outfile.write(decompressed_file.read())
     else:
         print("File already downloaded")
@@ -43,7 +44,7 @@ def insert_into_db(file_name):
     columns = pd.read_sql(get_columns(get_table_name(file_name)), engine)
     if not columns.empty:
         columns_names = list(columns['column_name'])
-        df = pd.read_csv(file_name, sep='\t', skiprows=[0], header=None,
+        df = pd.read_csv(db_data_directory + file_name, sep='\t', skiprows=[0], header=None,
                          names=columns_names)
         print('CSV shape', df.shape)
 
@@ -74,11 +75,12 @@ def insert_into_db(file_name):
         print("Done preprocessing", file_name)
     else:
         # Fallback on default table
-        df = pd.read_csv(file_name, sep='\t', skiprows=None, header=0)
+        df = pd.read_csv(db_data_directory + file_name, sep='\t', skiprows=None, header=0)
         print("Done reading csv", file_name)
     try:
         # Insert data to db
-        df.to_sql(get_table_name(file_name), engine, if_exists='append', index=False, chunksize=10000)
+        df.to_sql(get_table_name(file_name), engine, if_exists='append', index=False,
+                  chunksize=10000)
     except Exception as e:
         print(e)
 
@@ -102,8 +104,8 @@ class InsertFile(threading.Thread):
 
 if __name__ == "__main__":
     start = time.time()
-    # drop_tables()
-    # create_tables()
+    drop_tables()
+    create_tables()
 
     # download and insert parallel
     for url in urls:

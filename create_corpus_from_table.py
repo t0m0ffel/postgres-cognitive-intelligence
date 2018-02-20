@@ -7,12 +7,13 @@ from imbd_specs import get_columns
 # result = engine.execute(
 #     "SELECT * FROM name_basics JOIN title_basics ON  tconst = ANY(know_for_titles) "
 #     "LIMIT 1000")
+from train_vectors import train
 
 ignorable_columns = ['nconst', 'title_id', 'tconst', 'birth_year', 'death_year', 'original_title']
 
 corpus = './corpus/'
 
-file_name = corpus + 'actor_movie_corpus.txt'
+file_name = corpus + 'actor_movie_corpus_2.txt'
 
 
 def tokenize1(column_name, value):
@@ -26,7 +27,7 @@ def tokenize2(column_name, value):
     return " " + column_name + " " + value.lower() + " "
 
 
-tokenize = tokenize1
+tokenize = tokenize2
 
 
 def extract_row(row, columns):
@@ -121,7 +122,7 @@ while length != 0:
                 line += " ".join(item) + " "
             else:
                 if item is None:
-                    pass  # line += tokenize("", "NULL") + " "
+                    line += tokenize("", "NULL") + " "
                 else:
                     line += tokenize("", str(item)) + " "
 
@@ -141,6 +142,4 @@ while length != 0:
     chunk = chunk + chunk_size
     print('Inserted entries', chunk)
 
-from reduce_corpus import reduce_corpus
-
-reduce_corpus()
+train()

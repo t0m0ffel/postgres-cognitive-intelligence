@@ -3,7 +3,6 @@ import threading
 
 from engine import execute
 from imbd_specs import get_columns
-
 # result = engine.execute(
 #     "SELECT * FROM name_basics JOIN title_basics ON  tconst = ANY(know_for_titles) "
 #     "LIMIT 1000")
@@ -13,7 +12,7 @@ ignorable_columns = ['nconst', 'title_id', 'tconst', 'birth_year', 'death_year',
 
 corpus = './corpus/'
 
-file_name = corpus + 'actor_movie_corpus_2.txt'
+file_name = corpus + 'actor_movie_corpus_3.txt'
 
 
 def tokenize1(column_name, value):
@@ -27,7 +26,20 @@ def tokenize2(column_name, value):
     return " " + column_name + " " + value.lower() + " "
 
 
-tokenize = tokenize2
+def tokenize3(column_name, value):
+    value = value.replace(' ', '_')
+    column_name = column_name.lower()
+    if value == "NULL" or value == 'TRUE' or value == 'FALSE':
+        return " {}_{} ".format(column_name, value)
+    try:
+        return " {}_{} ".format(column_name, int(value))
+    except ValueError:
+        pass
+
+    return " " + value.lower() + " "
+
+
+tokenize = tokenize3
 
 
 def extract_row(row, columns):
@@ -88,24 +100,24 @@ class ExtractRow(threading.Thread):
 
 # result = execute("SELECT * FROM {}".format(table_name))
 
-
 length = 1
 chunk = 0
 chunk_size = 600000
 with open(file_name, 'w') as file:
     file.write("")
+
+columns = []
 # select entries in chunks to speed things up
 while length != 0:
-    result = execute(
-        "SELECT * FROM name_basics JOIN title_basics ON  tconst = ANY(know_for_titles) ORDER BY nconst"
-        " LIMIT {} OFFSET {}".format(
-            chunk_size, chunk))
-
+    result = execute(("SELECT * FROM name_basics JOIN title_basics "
+                      "ON  tconst = ANY(know_for_titles) ORDER BY nconst LIMIT {} OFFSET {}").format(
+        chunk_size, chunk))
+    if len(columns) == 0:
+        columns = [col[0] for col in result.cursor.description]
     print("Done reading")
 
     length = result.rowcount
     print("Rowcount ", length)
-    columns = execute(get_columns(table_name)).fetchall()
     for i, row in enumerate(result):
 
         # thread = ExtractRow(row, columns)
@@ -115,16 +127,18 @@ while length != 0:
             print(i, 'of', length)
         line = ""
         row = [item for item in row]
-        for index in [1, 2, 3, 4, 7, 8, 9, 10, 11, 12]:
+        # arbitrary selection of columns
+        cols_of_interest = [1, 2, 3, 4, 7, 8, 9, 10, 11, 12]
+        for index in cols_of_interest:
             item = row[index]
             if isinstance(item, list):
                 item = [tokenize("", str(e)) for e in item]
                 line += " ".join(item) + " "
             else:
                 if item is None:
-                    line += tokenize("", "NULL") + " "
+                    line += tokenize(columns[index], "NULL") + " "
                 else:
-                    line += tokenize("", str(item)) + " "
+                    line += tokenize(columns[index], str(item)) + " "
 
         with open(file_name, 'a') as file:
             file.write(delete_double_spaces(line + "\n"))

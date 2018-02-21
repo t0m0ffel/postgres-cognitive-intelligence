@@ -1,9 +1,6 @@
-from train_vectors import train
-
-
 # create smaller corpus for training to fit in memory
 def reduce_corpus():
-    filepath = './corpus/actor_movie_corpus.txt'
+    filepath = './corpus/actor_movie_corpus_3.txt'
 
     line_count = 5000000
 
@@ -19,5 +16,3 @@ def reduce_corpus():
                 file.write(line)
             if i % 10000 == 0:
                 print(i)
-
-    train()

@@ -3,16 +3,16 @@ import threading
 
 from engine import execute
 from imbd_specs import get_columns
+
 # result = engine.execute(
 #     "SELECT * FROM name_basics JOIN title_basics ON  tconst = ANY(know_for_titles) "
 #     "LIMIT 1000")
-from train_vectors import train
 
 ignorable_columns = ['nconst', 'title_id', 'tconst', 'birth_year', 'death_year', 'original_title']
 
 corpus = './corpus/'
 
-file_name = corpus + 'actor_movie_corpus_3.txt'
+file_name = corpus + 'actor_movie_corpus_4.txt'
 
 
 def tokenize1(column_name, value):
@@ -39,10 +39,7 @@ def tokenize3(column_name, value):
     return " " + value.lower() + " "
 
 
-tokenize = tokenize3
-
-
-def extract_row(row, columns):
+def extract_row(row, columns, tokenize=None):
     foreign_keys = {'know_for_titles': [('title_basics', 'tconst'), ('title_ratings', 'tconst')]}
     line = ""
     for column_name, column_type in columns:
@@ -83,10 +80,6 @@ def delete_double_spaces(string):
     return re.sub(' +', ' ', string).lstrip()
 
 
-threads = []
-max_threads = 50
-
-
 class ExtractRow(threading.Thread):
     def __init__(self, row, columns):
         threading.Thread.__init__(self)
@@ -98,62 +91,75 @@ class ExtractRow(threading.Thread):
             file.write(delete_double_spaces(extract_row(self.row, self.columns)) + "\n")
 
 
-# result = execute("SELECT * FROM {}".format(table_name))
-
 length = 1
-chunk = 0
-chunk_size = 600000
-with open(file_name, 'w') as file:
-    file.write("")
 
-columns = []
-# select entries in chunks to speed things up
-while length != 0:
-    result = execute(("SELECT * FROM name_basics JOIN title_basics "
-                      "ON  tconst = ANY(know_for_titles) ORDER BY nconst LIMIT {} OFFSET {}").format(
-        chunk_size, chunk))
-    if len(columns) == 0:
+
+class InsertChunk(threading.Thread):
+    def __init__(self, tokenize, chunk_size, chunk):
+        threading.Thread.__init__(self)
+        self.chunk = chunk
+        self.tokenize = tokenize
+        self.chunk_size = chunk_size
+
+    def run(self):
+        global length
+        result = execute(("SELECT * FROM name_basics JOIN title_basics ON  tconst = ANY(know_for_titles) "
+                          "ORDER BY nconst LIMIT {} OFFSET {}").format(self.chunk_size, self.chunk))
         columns = [col[0] for col in result.cursor.description]
-    print("Done reading")
-
-    length = result.rowcount
-    print("Rowcount ", length)
-    for i, row in enumerate(result):
-
-        # thread = ExtractRow(row, columns)
-        # threads.append(thread)
-        # thread.start()
-        if i % 100000 == 0:
-            print(i, 'of', length)
-        line = ""
-        row = [item for item in row]
-        # arbitrary selection of columns
-        cols_of_interest = [1, 2, 3, 4, 7, 8, 9, 10, 11, 12]
-        for index in cols_of_interest:
-            item = row[index]
-            if isinstance(item, list):
-                item = [tokenize("", str(e)) for e in item]
-                line += " ".join(item) + " "
-            else:
-                if item is None:
-                    line += tokenize(columns[index], "NULL") + " "
+        length = result.rowcount
+        print("Rowcount ", length)
+        for i, row in enumerate(self.result):
+            line = ""
+            row = [item for item in row]
+            # arbitrary selection of columns
+            cols_of_interest = [1, 2, 3, 4, 7, 8, 9, 10, 11, 12]
+            for index in cols_of_interest:
+                item = row[index]
+                if isinstance(item, list):
+                    item = [self.tokenize(columns[index], str(e)) for e in item]
+                    line += " ".join(item) + " "
                 else:
-                    line += tokenize(columns[index], str(item)) + " "
+                    if item is None:
+                        line += self.tokenize(columns[index], "NULL") + " "
+                    else:
+                        line += self.tokenize(columns[index], str(item)) + " "
 
-        with open(file_name, 'a') as file:
-            file.write(delete_double_spaces(line + "\n"))
+            with open(file_name, 'a') as file:
+                file.write(delete_double_spaces(line + "\n"))
+        print('Done inserting chunk')
+
+
+def create_corpus(tokenize):
+    global length
+    length = 1
+    threads = []
+    max_threads = 3
+    chunk = 0
+    chunk_size = 600000
+    with open(file_name, 'w') as file:
+        file.write("")
+
+    # select entries in chunks to speed things up
+    while length != 0:
+
+        ####
+        thread = InsertChunk(tokenize, chunk_size, chunk)
+        threads.append(thread)
+        thread.start()
 
         if len(threads) >= max_threads:
+            print('Joining threads')
             for thread in threads:
                 thread.join()
             threads = []
+            print('Inserted entries', chunk)
 
-            print(i, 'of', length)
+        chunk = chunk + chunk_size
 
     if len(threads) > 0:
         for thread in threads:
             thread.join()
-    chunk = chunk + chunk_size
-    print('Inserted entries', chunk)
+    print('Done creating corpus')
 
-train()
+
+create_corpus(tokenize3)

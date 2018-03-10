@@ -8,11 +8,10 @@ conf_dbuser = 'postgres'
 conf_dbpassword = 'postgres'
 conf_hostname = 'localhost'
 conf_dbport = '5432'
-conf_dbname = 'imbd'
+conf_dbname = 'imbd_data'
 
 postgres_uri = '{}+{}://{}:{}@{}:{}/{}'.format(conf_type, conf_driver, conf_dbuser, conf_dbpassword, conf_hostname,
-                                               conf_dbport,
-                                               conf_dbname)
+                                               conf_dbport, conf_dbname)
 
 
 def is_db_existing():

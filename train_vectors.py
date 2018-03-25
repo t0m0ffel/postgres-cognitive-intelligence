@@ -1,5 +1,5 @@
 import subprocess
 
 
-def train():
-    subprocess.call(['./train_vectors.sh'])
+def train(*args):
+    subprocess.call(['./train_vectors.sh', *args])

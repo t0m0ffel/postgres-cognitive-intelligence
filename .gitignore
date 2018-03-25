@@ -1,6 +1,7 @@
 *.bin
 *.vec
 /corpus/*.txt
+/corpus/corpus
 /fasttext
 /db_data
 

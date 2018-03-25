@@ -2,14 +2,13 @@
 # Ameer Ayoub <ameer.ayoub@gmail.com>
 # @todo make the whole thing database agnostic so we can switch
 
-import os
 import re
-import time
 from types import StringType
-
-import cPickle as pickle
+import os
 from numerals import rntoi
-from settings import DatabaseTypes
+import time
+import cPickle as pickle
+from settings import Database, Options, DatabaseTypes
 
 
 def get_schema_prefix(type_d):
@@ -164,8 +163,7 @@ def executescript(c, of, debug=False):
     for query in query_list:
         if query.strip():
             if debug:
-                print
-                "executescript [status] : executing query:\n\t%s\n" % (query.strip())
+                print "executescript [status] : executing query:\n\t%s\n" % (query.strip())
             c.execute(query.strip())
 
 
@@ -175,13 +173,11 @@ def create_tables(c, drop_all=False):
     Things that are chars are instead integers which we can use an in program
     defined enum (integers) since chars are unavailable in sqlite and text would
     be unnecessary."""
-    print
-    "create_tables [status]: create tables triggered."
+    print "create_tables [status]: create tables triggered."
     autoincrement = " autoincrement"
     global Options, Database
     if drop_all:
-        print
-        "create_tables [status]: dropping tables initiated."
+        print "create_tables [status]: dropping tables initiated."
         if Database.type == DatabaseTypes.SQLITE:
             drop_sql = open(mk_drop("sqlite")).read()
         elif Database.type == DatabaseTypes.MYSQL:
@@ -193,8 +189,7 @@ def create_tables(c, drop_all=False):
             query = line.strip()
             if query:
                 c.execute(line)
-        print
-        "create_tables [status]: dropping tables complete."
+        print "create_tables [status]: dropping tables complete."
     if Database.type == DatabaseTypes.SQLITE:
         dbf = open(mk_schema("sqlite", Options.use_dict))
         query_list = dbf.read()
@@ -217,8 +212,7 @@ def quote_escape(string):
 # @todo optimize the query building functions by using lists/join
 def build_select_query(name, param_dict):
     if not param_dict:
-        print
-        "build_select_query: error param dictionary is empty!"
+        print "build_select_query: error param dictionary is empty!"
         return None
     select_query = "SELECT id" + name + " FROM " + name + " WHERE "
     for k, v in param_dict.items():
@@ -230,16 +224,14 @@ def build_select_query(name, param_dict):
     # remove trailing AND
     select_query = select_query[:-4] + "LIMIT 1"
     if Options.query_debug:
-        print
-        select_query
+        print select_query
     return select_query
 
 
 def build_insert_query(name, param_dict, quote_keys=False):
     global Database
     if not param_dict:
-        print
-        "build_insert_query: [error] param dictionary is empty!"
+        print "build_insert_query: [error] param dictionary is empty!"
         return None
     insert_query_front = "INSERT INTO " + name + " ("
     insert_query_end = ") VALUES ("
@@ -260,8 +252,7 @@ def build_insert_query(name, param_dict, quote_keys=False):
         # preconvert to db encoding to avoid db errors, especially from postgres / utf-8
         insert_query = insert_query.decode(Database.encoding, errors='ignore')
     if Options.query_debug:
-        print
-        insert_query
+        print insert_query
     return insert_query
 
 
@@ -310,8 +301,7 @@ def select_or_insert(connection_cursor, name, param_dict, skip_lookup=False, sup
             if row:
                 return row[0]
             else:
-                print
-                "select_or_insert: [error] could not insert : ", param_dict
+                print "select_or_insert: [error] could not insert : ", param_dict
                 return None
         else:
             return None
@@ -393,15 +383,13 @@ def connect_db(db, create_tables_enabled=False):
             create_tables(c, drop_all=db.clear_old_db)
     elif db.type == DatabaseTypes.POSTGRES:
         psycopg2 = __import__("psycopg2")
-        print
-        db.host, db.database, db.user, db.password
+        print db.host, db.database, db.user, db.password
         conn = psycopg2.connect(host=db.host, database=db.database, user=db.user, password=db.password, port='5432')
         c = conn.cursor()
         if create_tables_enabled:
             create_tables(c, drop_all=db.clear_old_db)
     else:
-        print
-        "__main__ [error]: unknown database type #%d." % (db.type)
+        print "__main__ [error]: unknown database type #%d." % (db.type)
         quit()
     return conn, c
 
@@ -435,11 +423,9 @@ if __name__ == "__main__":
     conn, c = connect_db(Database, create_tables_enabled=True)
 
     if Options.use_native:
-        print
-        "__main__ [status]: using native c parsing code."
+        print "__main__ [status]: using native c parsing code."
     else:
-        print
-        "__main__ [status]: using python regex parsing code."
+        print "__main__ [status]: using python regex parsing code."
     # Read in data from raw list files
 
     #
@@ -449,7 +435,7 @@ if __name__ == "__main__":
     #
     if process_flags["actors"] or Options.proc_all:
         files_to_process = ["actresses", "actors"]
-        # files_to_process = ["actors"]
+        #files_to_process = ["actors"]
         # files_to_process = ["actors.test"]
         for file in files_to_process:
             current_file = mk(file)
@@ -464,8 +450,7 @@ if __name__ == "__main__":
             new_actor = True
             for line in f:
                 if Options.show_progress and (line_number % Options.progress_count == 0):
-                    print
-                    "__main__ [status]: processing line", line_number
+                    print "__main__ [status]: processing line", line_number
                 if Options.commit_count != -1 and (line_number % Options.commit_count == 0):
                     conn.commit()
                 line_number += 1
@@ -528,8 +513,7 @@ if __name__ == "__main__":
                             print("__main__ [error]: while processing " + current_file + "[" + str(
                                 line_number) + "]: " +
                                   "year not valid integer value: \n\"" + to_process + "\"\n--> \t"),
-                            print
-                            n,
+                            print n,
                             quit()
                         number = rntoi(n[2])  # in roman numerals, needs to be converted
                         special_code = MoviesType.from_str(n[3])
@@ -544,8 +528,7 @@ if __name__ == "__main__":
                             print("__main__ [error]: while processing " + current_file + "[" + str(
                                 line_number) + "]: " +
                                   " not valid integer value: \n\"" + to_process + "\"\n--> \t"),
-                            print
-                            n,
+                            print n,
                 else:
                     n = re.match(ParseRegexes.acted_in, to_process)
                     if n:
@@ -586,12 +569,10 @@ if __name__ == "__main__":
                     print("__main__ [error]: while processing" + current_file + "[" + str(line_number) + "]: " +
                           "invalid info: " + to_process)
                     if Options.use_native:
-                        print
-                        "parsed as: ", n
+                        print "parsed as: ", n
             f.close()
             conn.commit()
-            print
-            "__main__ [status]: processing of", current_file, "complete."
+            print "__main__ [status]: processing of", current_file, "complete."
         if Options.use_cache and Options.use_dict:
             save_dict("actors")
             save_dict("movies")
@@ -618,8 +599,7 @@ if __name__ == "__main__":
         line_number += 1
         for line in f:
             if Options.show_progress and (line_number % Options.progress_count == 0):
-                print
-                "__main__ [status]: processing line", line_number
+                print "__main__ [status]: processing line", line_number
             if Options.commit_count != -1 and (line_number % Options.commit_count == 0):
                 conn.commit()
             line_number += 1
@@ -658,8 +638,7 @@ if __name__ == "__main__":
         if Options.use_cache and Options.use_dict:
             save_dict("movies")
             save_dict("series")
-        print
-        "__main__ [status]: processing of", current_file, "complete."
+        print "__main__ [status]: processing of", current_file, "complete."
 
     #
     # Aka-Names List File
@@ -669,14 +648,11 @@ if __name__ == "__main__":
     if process_flags["aka_names"] or Options.proc_all:
         current_file = mk("aka-names")
         if Options.use_cache and Options.use_dict:
-            print
-            "__main__ [status]: loading actors cache file."
+            print "__main__ [status]: loading actors cache file."
             if load_dict("actors"):
-                print
-                "__main__ [status]: loaded actors dictionary cache file."
+                print "__main__ [status]: loaded actors dictionary cache file."
             else:
-                print
-                "__main__ [warning]: failed to load actors dictionary cache file."
+                print "__main__ [warning]: failed to load actors dictionary cache file."
         f = open(current_file)
         # Skip over the information at the beginning and get to the actual data list
         line_number = 1
@@ -688,8 +664,7 @@ if __name__ == "__main__":
         is_valid = True
         for line in f:
             if Options.show_progress and (line_number % Options.progress_count == 0):
-                print
-                "__main__ [status]: processing line", line_number
+                print "__main__ [status]: processing line", line_number
             if Options.commit_count != -1 and (line_number % Options.commit_count == 0):
                 conn.commit()
             line_number += 1
@@ -758,8 +733,7 @@ if __name__ == "__main__":
             # supress alias names errors
         f.close()
         conn.commit()
-        print
-        "__main__ [status]: processing of", current_file, "complete."
+        print "__main__ [status]: processing of", current_file, "complete."
 
     #
     # Aka-Titles List File
@@ -769,14 +743,11 @@ if __name__ == "__main__":
     if process_flags["aka_titles"] or Options.proc_all:
         current_file = mk("aka-titles")
         if Options.use_cache and Options.use_dict:
-            print
-            "__main__ [status]: loading movies cache file."
+            print "__main__ [status]: loading movies cache file."
             if load_dict("movies"):
-                print
-                "__main__ [status]: loaded movies dictionary cache file."
+                print "__main__ [status]: loaded movies dictionary cache file."
             else:
-                print
-                "__main__ [warning]: failed to load movies dictionary cache file."
+                print "__main__ [warning]: failed to load movies dictionary cache file."
         f = open(current_file)
         # Skip over the information at the beginning and get to the actual data list
         line_number = 1
@@ -788,8 +759,7 @@ if __name__ == "__main__":
         is_valid = True
         for line in f:
             if Options.show_progress and (line_number % Options.progress_count == 0):
-                print
-                "__main__ [status]: processing line", line_number
+                print "__main__ [status]: processing line", line_number
             if Options.commit_count != -1 and (line_number % Options.commit_count == 0):
                 conn.commit()
             line_number += 1
@@ -850,8 +820,7 @@ if __name__ == "__main__":
                         current_file, line_number, to_process))
         f.close()
         conn.commit()
-        print
-        "__main__ [status]: processing of", current_file, "complete."
+        print "__main__ [status]: processing of", current_file, "complete."
 
     #
     # Movies Genres
@@ -861,14 +830,11 @@ if __name__ == "__main__":
     if process_flags["genres"] or Options.proc_all:
         current_file = mk("genres")
         if Options.use_cache and Options.use_dict:
-            print
-            "__main__ [status]: loading movies cache file."
+            print "__main__ [status]: loading movies cache file."
             if load_dict("movies"):
-                print
-                "__main__ [status]: loaded movies dictionary cache file."
+                print "__main__ [status]: loaded movies dictionary cache file."
             else:
-                print
-                "__main__ [warning]: failed to load movies dictionary cache file."
+                print "__main__ [warning]: failed to load movies dictionary cache file."
         f = open(current_file)
         # Skip over the information at the beginning and get to the actual data list
         line_number = 1
@@ -880,8 +846,7 @@ if __name__ == "__main__":
         line_number += 1
         for line in f:
             if Options.show_progress and (line_number % Options.progress_count == 0):
-                print
-                "__main__ [status]: processing line", line_number
+                print "__main__ [status]: processing line", line_number
             if Options.commit_count != -1 and (line_number % Options.commit_count == 0):
                 conn.commit()
             line_number += 1
@@ -925,8 +890,7 @@ if __name__ == "__main__":
         conn.commit()
         if Options.use_cache and Options.use_dict:
             save_dict("genres")
-        print
-        "__main__ [status]: processing of", current_file, "complete."
+        print "__main__ [status]: processing of", current_file, "complete."
 
     #
     # Movies Keywords
@@ -936,14 +900,11 @@ if __name__ == "__main__":
     if process_flags["keywords"] or Options.proc_all:
         current_file = mk("keywords")
         if Options.use_cache and Options.use_dict:
-            print
-            "__main__ [status]: loading movies cache file."
+            print "__main__ [status]: loading movies cache file."
             if load_dict("movies"):
-                print
-                "__main__ [status]: loaded movies dictionary cache file."
+                print "__main__ [status]: loaded movies dictionary cache file."
             else:
-                print
-                "__main__ [warning]: failed to load movies dictionary cache file."
+                print "__main__ [warning]: failed to load movies dictionary cache file."
         f = open(current_file)
         # Skip over the information at the beginning and get to the actual data list
         line_number = 1
@@ -955,8 +916,7 @@ if __name__ == "__main__":
         line_number += 1
         for line in f:
             if Options.show_progress and (line_number % Options.progress_count == 0):
-                print
-                "__main__ [status]: processing line", line_number
+                print "__main__ [status]: processing line", line_number
             if Options.commit_count != -1 and (line_number % Options.commit_count == 0):
                 conn.commit()
             line_number += 1
@@ -1001,11 +961,9 @@ if __name__ == "__main__":
         conn.commit()
         if Options.use_cache and Options.use_dict:
             save_dict("keywords")
-        print
-        "__main__ [status]: processing of", current_file, "complete."
+        print "__main__ [status]: processing of", current_file, "complete."
 
     c.close()
     conn.close()
     if Options.show_time:
-        print
-        "__main__ [status]: total time:", time.clock() - start, "seconds."
+        print "__main__ [status]: total time:", time.clock() - start, "seconds."

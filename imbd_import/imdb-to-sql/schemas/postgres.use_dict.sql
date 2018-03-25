@@ -35,12 +35,15 @@ CREATE SEQUENCE acted_in_idacted_in_seq
   NO MAXVALUE
   CACHE 1;
 
+
+
 --
 -- Name: acted_in_idacted_in_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE acted_in_idacted_in_seq
 OWNED BY acted_in.idacted_in;
+
 
 --
 -- Name: actors; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -55,6 +58,8 @@ CREATE TABLE actors (
   number   INTEGER
 );
 
+
+
 --
 -- Name: aka_names; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -64,6 +69,8 @@ CREATE TABLE aka_names (
   idactors    INTEGER,
   name        TEXT
 );
+
+
 
 --
 -- Name: aka_names_idaka_names_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -76,12 +83,15 @@ CREATE SEQUENCE aka_names_idaka_names_seq
   NO MAXVALUE
   CACHE 1;
 
+
+
 --
 -- Name: aka_names_idaka_names_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE aka_names_idaka_names_seq
 OWNED BY aka_names.idaka_names;
+
 
 --
 -- Name: genres; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -91,6 +101,8 @@ CREATE TABLE genres (
   idgenres INTEGER,
   genre    TEXT
 );
+
+
 
 --
 -- Name: idaka_titles; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -104,6 +116,8 @@ CREATE TABLE aka_titles (
   year         INTEGER
 );
 
+
+
 --
 -- Name: idaka_titles_idaka_titles_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -114,6 +128,8 @@ CREATE SEQUENCE aka_titles_idaka_titles_seq
   NO MINVALUE
   NO MAXVALUE
   CACHE 1;
+
+
 
 --
 -- Name: idaka_titles_idaka_titles_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -131,6 +147,8 @@ CREATE TABLE keywords (
   keyword    TEXT
 );
 
+
+
 --
 -- Name: movies; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -145,6 +163,8 @@ CREATE TABLE movies (
   language TEXT
 );
 
+
+
 --
 -- Name: movies_genres; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -155,6 +175,8 @@ CREATE TABLE movies_genres (
   idgenres        INTEGER,
   idseries        INTEGER
 );
+
+
 
 --
 -- Name: movies_genres_idmovies_genres_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -167,12 +189,15 @@ CREATE SEQUENCE movies_genres_idmovies_genres_seq
   NO MAXVALUE
   CACHE 1;
 
+
+
 --
 -- Name: movies_genres_idmovies_genres_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE movies_genres_idmovies_genres_seq
 OWNED BY movies_genres.idmovies_genres;
+
 
 --
 -- Name: movies_keywords; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -185,6 +210,8 @@ CREATE TABLE movies_keywords (
   idseries          INTEGER
 );
 
+
+
 --
 -- Name: movies_keywords_idmovies_keywords_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -196,12 +223,15 @@ CREATE SEQUENCE movies_keywords_idmovies_keywords_seq
   NO MAXVALUE
   CACHE 1;
 
+
+
 --
 -- Name: movies_keywords_idmovies_keywords_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE movies_keywords_idmovies_keywords_seq
 OWNED BY movies_keywords.idmovies_keywords;
+
 
 --
 -- Name: series; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -214,6 +244,8 @@ CREATE TABLE series (
   season   INTEGER,
   number   INTEGER
 );
+
+
 
 --
 -- Name: idacted_in; Type: DEFAULT; Schema: public; Owner: postgres
@@ -229,12 +261,14 @@ ALTER TABLE acted_in
 ALTER TABLE aka_names
   ALTER COLUMN idaka_names SET DEFAULT nextval('aka_names_idaka_names_seq' :: REGCLASS);
 
+
 --
 -- Name: idaka_titles; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE aka_titles
   ALTER COLUMN idaka_titles SET DEFAULT nextval('aka_titles_idaka_titles_seq' :: REGCLASS);
+
 
 --
 -- Name: idmovies_genres; Type: DEFAULT; Schema: public; Owner: postgres
@@ -243,12 +277,14 @@ ALTER TABLE aka_titles
 ALTER TABLE movies_genres
   ALTER COLUMN idmovies_genres SET DEFAULT nextval('movies_genres_idmovies_genres_seq' :: REGCLASS);
 
+
 --
 -- Name: idmovies_keywords; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE movies_keywords
   ALTER COLUMN idmovies_keywords SET DEFAULT nextval('movies_keywords_idmovies_keywords_seq' :: REGCLASS);
+
 
 --
 -- Name: acted_in_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -257,12 +293,14 @@ ALTER TABLE movies_keywords
 ALTER TABLE ONLY acted_in
   ADD CONSTRAINT acted_in_pkey PRIMARY KEY (idacted_in);
 
+
 --
 -- Name: actors_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
 ALTER TABLE ONLY actors
   ADD CONSTRAINT actors_pkey PRIMARY KEY (idactors);
+
 
 --
 -- Name: aka_names_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -271,12 +309,14 @@ ALTER TABLE ONLY actors
 ALTER TABLE ONLY aka_names
   ADD CONSTRAINT aka_names_pkey PRIMARY KEY (idaka_names);
 
+
 --
 -- Name: genres_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
 ALTER TABLE ONLY genres
   ADD CONSTRAINT genres_pkey PRIMARY KEY (idgenres);
+
 
 --
 -- Name: idaka_titles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -285,12 +325,14 @@ ALTER TABLE ONLY genres
 ALTER TABLE ONLY aka_titles
   ADD CONSTRAINT aka_titles_pkey PRIMARY KEY (idaka_titles);
 
+
 --
 -- Name: keywords_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
 ALTER TABLE ONLY keywords
   ADD CONSTRAINT keywords_pkey PRIMARY KEY (idkeywords);
+
 
 --
 -- Name: movies_genres_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -299,12 +341,14 @@ ALTER TABLE ONLY keywords
 ALTER TABLE ONLY movies_genres
   ADD CONSTRAINT movies_genres_pkey PRIMARY KEY (idmovies_genres);
 
+
 --
 -- Name: movies_keywords_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
 ALTER TABLE ONLY movies_keywords
   ADD CONSTRAINT movies_keywords_pkey PRIMARY KEY (idmovies_keywords);
+
 
 --
 -- Name: movies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -313,12 +357,14 @@ ALTER TABLE ONLY movies_keywords
 ALTER TABLE ONLY movies
   ADD CONSTRAINT movies_pkey PRIMARY KEY (idmovies);
 
+
 --
 -- Name: series_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
 ALTER TABLE ONLY series
   ADD CONSTRAINT series_pkey PRIMARY KEY (idseries);
+
 
 --
 -- Name: public; Type: ACL; Schema: -; Owner: postgres

@@ -44,9 +44,12 @@ if __name__ == "__main__":
     failure = False
     for i in range(100):
         if i + 1 != nums[i]:
-            print("mismatch: ", numerals[i], "->", nums[i], "expected", i + 1)
+            print
+            "mismatch: ", numerals[i], "->", nums[i], "expected", i + 1
             failure = True
     if failure:
-        print("complete.")
+        print
+        "complete."
     else:
-        print("complete with no errors.")
+        print
+        "complete with no errors."

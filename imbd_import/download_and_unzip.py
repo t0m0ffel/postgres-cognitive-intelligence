@@ -14,11 +14,14 @@ def unzip_files():
     db_dir = './ftp.fu-berlin.de/pub/misc/movies/database/frozendata/'
     files_dir = os.listdir(db_dir)
 
+    files_ = './unzip_files/'
+    if not os.path.exists(files_):
+        os.makedirs(files_)
     for file_name in files_dir:
         print(file_name)
         if 'list.gz' in file_name:
             decompressed_file = gzip.open(db_dir + file_name)  # open the file
-            with open('./unzip_files/' + file_name.split('.')[0] + '.list', 'wb') as outfile:
+            with open(files_ + file_name.split('.')[0] + '.list', 'wb') as outfile:
                 outfile.write(decompressed_file.read())
 
 

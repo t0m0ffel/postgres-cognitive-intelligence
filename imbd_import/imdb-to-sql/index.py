@@ -1,5 +1,5 @@
-from imbd_import.imdb_to_sql.settings import Database, Options
-from imbd_import.imdb_to_sql.tosql import connect_db, executescript, get_schema_prefix
+from settings import Database, Options
+from tosql import connect_db, executescript, get_schema_prefix
 
 
 def mk_index(name):

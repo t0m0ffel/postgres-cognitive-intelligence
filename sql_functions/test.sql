@@ -1,16 +1,11 @@
-CREATE OR REPLACE FUNCTION test(word1 VARCHAR [])
-  RETURNS VARCHAR []
+CREATE OR REPLACE FUNCTION test(m movies)
+  RETURNS INTEGER
 AS $$
+keys = []
+for key in m:
+    keys.append(key)
 
-import os
-
-plpy.notice(os.path.abspath('.'))
-
-
-def main(word1):
-    return [word1]
-
-
-return word1
+plpy.notice(keys)
+return 1
 $$
 LANGUAGE plpythonu;

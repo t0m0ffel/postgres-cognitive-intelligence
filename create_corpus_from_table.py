@@ -32,7 +32,8 @@ def tokenize3(column_name, value):
     if value == "NULL" or value == 'TRUE' or value == 'FALSE':
         return " {}_{} ".format(column_name, value)
     try:
-        return " {}_{} ".format(column_name, int(value))
+        intval = int(value)
+        return " {}_{} ".format(column_name, intval)
     except ValueError:
         pass
 
@@ -63,13 +64,13 @@ def extract_row(row, columns):
                         line += extract_row(ro, cols)
         else:
             if row[column_name] is None:
-                line += tokenize(column_name, "NULL")
+                line += tokenize3(column_name, "NULL")
             else:
                 if column_type == 'ARRAY':
-                    line += " ".join([tokenize(column_name, str(val))
+                    line += " ".join([tokenize3(column_name, str(val))
                                       for val in row[column_name]]) + " "
                 else:
-                    line += tokenize(column_name, (str(row[column_name])))
+                    line += tokenize3(column_name, (str(row[column_name])))
     return line
 
 
@@ -105,43 +106,40 @@ def create_corpus(tokenize, file_name):
 
     columns = []
 
-    statements = ["""SELECT  
-                          title,
-                          year,
-                          type,
-                          keyword,
-                          genre
-                      FROM movies
-                          LEFT JOIN movies_keywords ON movies_keywords.idmovies = movies.idmovies
-                          LEFT JOIN keywords ON movies_keywords.idkeywords = keywords.idkeywords
-                          LEFT JOIN movies_genres ON movies.idmovies = movies_genres.idmovies
-                          LEFT JOIN genres ON movies_genres.idgenres = genres.idgenres""",
+    statements = ["""SELECT title.title, aka_title.title, kind_type.kind, movie_info.info, movie_info.note
+                        FROM title
+                          JOIN aka_title ON title.id = aka_title.movie_id
+                          JOIN movie_info ON movie_info.movie_id = aka_title.movie_id
+                          JOIN kind_type ON title.kind_id = kind_type.id""",
 
-                  """SELECT   
-                          actors.fname,
-                          actors.lname,
-                          billing_position,
-                          title,
-                          genre,
-                          year,
-                          character,
-                          language
-                        FROM actors
-                          LEFT JOIN acted_in ON acted_in.idactors = actors.idactors
-                          LEFT JOIN movies ON acted_in.idactors = actors.idactors
-                          LEFT JOIN movies_genres ON movies.idmovies = movies_genres.idmovies
-                          LEFT JOIN genres ON movies_genres.idgenres = genres.idgenres
-                        WHERE title NOTNULL
-                              AND fname NOTNULL
-                              AND lname NOTNULL"""
+                  """SELECT title.title, aka_title.title, keyword.keyword
+                      FROM title
+                        JOIN aka_title ON title.id = aka_title.movie_id
+                        JOIN movie_keyword ON title.id = movie_keyword.movie_id
+                        JOIN keyword ON movie_keyword.keyword_id = keyword.id
+                      """,
+                  """SELECT
+                    name.gender,
+                    cast_info.note,
+                    title.title,
+                    person_info.info,
+                    movie_info.info
+                  FROM person_info
+                    JOIN name ON person_info.person_id = name.id
+                    JOIN cast_info ON cast_info.movie_id = person_info.note
+                    JOIN movie_info ON movie_info.movie_id = cast_info.movie_id
+                    JOIN title ON title.id = movie_info.movie_id"""
+
                   ]
     s = 0
+    out = ""
     for statement in statements:
         print("Executing statement ", s)
         s += 1
+
         # select entries in chunks to speed things up
         while length != 0:
-            result = execute((statement + """ ORDER BY movies.idmovies LIMIT {} OFFSET {}""").format(
+            result = execute((statement + """ ORDER BY title.id LIMIT {} OFFSET {}""").format(
                 chunk_size, chunk))
             if len(columns) == 0:
                 columns = [col[0] for col in result.cursor.description]
@@ -152,6 +150,10 @@ def create_corpus(tokenize, file_name):
             for i, row in enumerate(result):
                 if i % (chunk_size / 2) == 0:
                     print(i, 'of', length)
+                    with open(file_name, 'a') as file:
+                        file.write(out)
+                        out = ""
+
                 line = ""
                 row = [item for item in row]
                 # arbitrary selection of columns
@@ -167,10 +169,12 @@ def create_corpus(tokenize, file_name):
                         else:
                             line += tokenize(columns[index], str(item)) + " "
 
-                with open(file_name, 'a') as file:
-                    file.write(delete_double_spaces(line + "\n"))
-
-                    print(i, 'of', length)
+                out += delete_double_spaces(line + "\n")
 
             chunk = chunk + chunk_size
             print('Inserted entries', chunk)
+
+        if len(out) > 0:
+            with open(file_name, 'a') as file:
+                file.write(out)
+                out = ""

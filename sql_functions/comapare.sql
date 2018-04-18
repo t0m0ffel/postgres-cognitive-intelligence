@@ -11,7 +11,6 @@ AS $$
 import gensim
 import numpy as np
 from scipy import spatial
-from numpy import dot
 from numpy.linalg import norm
 import operator
 

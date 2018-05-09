@@ -95,6 +95,7 @@ class ExtractRow(threading.Thread):
 # result = execute("SELECT * FROM {}".format(table_name))
 
 def create_corpus(tokenize, file_name):
+
     file_name = corpus + file_name
     threads = []
     max_threads = 50

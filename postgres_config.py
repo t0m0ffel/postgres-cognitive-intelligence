@@ -8,10 +8,15 @@ conf_dbuser = 'postgres'
 conf_dbpassword = 'postgres'
 conf_hostname = 'localhost'
 conf_dbport = '5432'
-conf_dbname = 'imbd_data_2'
+conf_dbname = 'dlpl'
 
 postgres_uri = '{}+{}://{}:{}@{}:{}/{}'.format(conf_type, conf_driver, conf_dbuser, conf_dbpassword, conf_hostname,
                                                conf_dbport, conf_dbname)
+
+
+def get_conn():
+    return psycopg2.connect(host=conf_hostname, database=conf_dbname,
+                            user=conf_dbuser, password=conf_dbpassword, port=conf_dbport)
 
 
 def is_db_existing():

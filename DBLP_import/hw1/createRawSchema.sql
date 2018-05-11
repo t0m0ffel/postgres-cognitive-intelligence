@@ -13,7 +13,7 @@ CREATE TABLE field
   v TEXT
 );
 
-CREATE TABLE author
+CREATE  TABLE author
 (
   author_id       BIGSERIAL
     CONSTRAINT author_author_id_pk

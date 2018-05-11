@@ -8,10 +8,11 @@ conf_dbuser = 'postgres'
 conf_dbpassword = 'postgres'
 conf_hostname = 'localhost'
 conf_dbport = '5432'
-conf_dbname = 'dlpl'
+conf_dbname = 'dblp'
 
-postgres_uri = '{}+{}://{}:{}@{}:{}/{}'.format(conf_type, conf_driver, conf_dbuser, conf_dbpassword, conf_hostname,
-                                               conf_dbport, conf_dbname)
+postgres_uri = "{}+{}://{}:{}@{}:{}/{}".format(conf_type, conf_driver, conf_dbuser, conf_dbpassword,
+                                                            conf_hostname,
+                                                            conf_dbport, conf_dbname)
 
 
 def get_conn():

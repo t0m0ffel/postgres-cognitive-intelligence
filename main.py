@@ -5,10 +5,10 @@ import gensim
 
 corpus_file = '_corpus'
 # reduce_corpus_path = 'corpus_reduced'
-create_corpus(tokenize3, corpus_file)
+#create_corpus(tokenize3, corpus_file)
 # reduce_corpus(corpus_file,reduce_corpus_path)
 # train(reduce_corpus_path, corpus_file, 'corpus_large.txt')
-# train(corpus_file)
+train(corpus_file)
 print('done')
 from gensim.models.wrappers import FastText
 import gensim
@@ -20,13 +20,13 @@ import gensim
 
 # model = gensim.models.KeyedVectors.load_word2vec_format('./models/actor_movie_model_skipgram.vec')
 # model.save('./test_gensim_model')
-
-model = gensim.models.KeyedVectors.load('./models/gensim_model_ws100', mmap='r+')
-
-print(model.similarity('friendship', 'love'))
-print(model.similarity('computers', 'love'))
-print(model.similarity('gay', 'homosexual'))
-print(model.similarity('gay', 'cheese'))
+#
+# model = gensim.models.KeyedVectors.load('./models/gensim_model_ws100', mmap='r+')
+#
+# print(model.similarity('friendship', 'love'))
+# print(model.similarity('computers', 'love'))
+# print(model.similarity('gay', 'homosexual'))
+# print(model.similarity('gay', 'cheese'))
 
 # # print([model.similarity('canim_ailem', 'wipeout'), model.similarity('please_like_me', 'wipeout'),
 # #        model.similarity('please_like_me', 'cabaret')])

@@ -95,7 +95,6 @@ class ExtractRow(threading.Thread):
 # result = execute("SELECT * FROM {}".format(table_name))
 
 def create_corpus(tokenize, file_name):
-
     file_name = corpus + file_name
     threads = []
     max_threads = 50
@@ -107,31 +106,33 @@ def create_corpus(tokenize, file_name):
 
     columns = []
 
-    statements = ["""SELECT title.title, aka_title.title, kind_type.kind, movie_info.info, movie_info.note
-                        FROM title
-                          JOIN aka_title ON title.id = aka_title.movie_id
-                          JOIN movie_info ON movie_info.movie_id = aka_title.movie_id
-                          JOIN kind_type ON title.kind_id = kind_type.id""",
+    statements = [
+        """
+        SELECT au.author_name, au.author_homepage,
+               ar.title, ar.year, ar.month, ar.volume, ar.journal, ar.number
+         FROM author au JOIN article_author aa ON aa.author_id = au.author_id JOIN article ar ON 
+        ar.pub_id = aa.pub_id
+        """,
+        """
+        SELECT au.author_name, au.author_homepage,
+               b.title,b.year,b.isbn,b.publisher
+         FROM author au JOIN book_author ba ON ba.author_id = au.author_id JOIN book b ON 
+        ba.pub_id = b.pub_id
+        """,
+        """
+        SELECT au.author_name, au.author_homepage,
+              i.title,i.year,i.isbn,i.booktitle
+         FROM author au JOIN inproceedings_author ia ON ia.author_id = au.author_id JOIN inproceedings i ON 
+        ia.pub_id = i.pub_id
+        """,
+        """
+        SELECT au.author_name, au.author_homepage,
+               i.title,i.year,i.isbn,i.booktitle,i.editor
+         FROM author au JOIN inproceedings_author ia ON ia.author_id = au.author_id JOIN inproceedings i ON 
+        i.pub_id = ia.pub_id
+        """,
+    ]
 
-                  """SELECT title.title, aka_title.title, keyword.keyword
-                      FROM title
-                        JOIN aka_title ON title.id = aka_title.movie_id
-                        JOIN movie_keyword ON title.id = movie_keyword.movie_id
-                        JOIN keyword ON movie_keyword.keyword_id = keyword.id
-                      """,
-                  """SELECT
-                    name.gender,
-                    cast_info.note,
-                    title.title,
-                    person_info.info,
-                    movie_info.info
-                  FROM person_info
-                    JOIN name ON person_info.person_id = name.id
-                    JOIN cast_info ON cast_info.movie_id = person_info.note
-                    JOIN movie_info ON movie_info.movie_id = cast_info.movie_id
-                    JOIN title ON title.id = movie_info.movie_id"""
-
-                  ]
     s = 0
     out = ""
     for statement in statements:
@@ -140,7 +141,7 @@ def create_corpus(tokenize, file_name):
 
         # select entries in chunks to speed things up
         while length != 0:
-            result = execute((statement + """ ORDER BY title.id LIMIT {} OFFSET {}""").format(
+            result = execute((statement + """ ORDER BY aa.author_id LIMIT {} OFFSET {}""").format(
                 chunk_size, chunk))
             if len(columns) == 0:
                 columns = [col[0] for col in result.cursor.description]

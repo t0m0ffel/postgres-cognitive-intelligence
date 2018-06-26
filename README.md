@@ -25,11 +25,11 @@ First you need to install all pip packages with:
     * Alternative: buckets
 
 
-![alt text](images/corpus_creation.png "Corpus Creation")
+![alt text](images/corpus_creation.PNG "Corpus Creation")
 
 
 #### Train FastText Model
-![alt text](images/train_model.png "Corpus Creation")
+![alt text](images/train_model.PNG "Corpus Creation")
 #### Calculate Vector for each row
 * Create vector space with every row as vector and row id as label
 ![alt text](images/model_from_table.png "Corpus Creation")
